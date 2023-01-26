@@ -20,9 +20,9 @@ const storage = multer.diskStorage({
 //Middleware
 const multerUpload = multer({
     storage: storage,
-    dest: path.join(__dirname, '../public/tablasMatriculas'),
+    dest: path.join(__dirname, '../public/utilDocs'),
     fileFilter: (req,file,cb) => {
-        const fileTypes = /csv/;
+        const fileTypes = /csv|jpg/;
         const mimetype = fileTypes.test(file.mimetype);
         const extName = fileTypes.test(path.extname(file.originalname))
         if(mimetype && extName){
@@ -35,22 +35,23 @@ const multerUpload = multer({
 
 router.use(Router.urlencoded());
 
-
+// Ruta raiz del servidor
 router.get('/', (req, res) => {
-    // res.send('Hello World!')
+    console.log("Conexion Raiz Servidor");
     res.send(devolverFecha())
   })
 
 
   
-  
+// Registro de nuevo usuario
   router.post("/altasUsuarioZPPencriptacion", async (req,res) =>{
-      console.log(req.params);
-      console.log(req.body);
-      console.log('Query');
-      console.log(req.query);
-      // Open a database connection
-      sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
+    console.log("Alta de Usuario");
+    console.log(req.params);
+    console.log(req.body);
+    console.log('Query');
+    console.log(req.query);
+    // Open a database connection
+    sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
         if (err) {
             console.log('Error Conexión DB');
             return console.error(err.message);
@@ -134,6 +135,9 @@ router.get('/', (req, res) => {
     
 });
 
+
+
+// Validación de inicio de sesión 
 router.post('/loginZPP', async(req, res) => {
     console.log("loginZPP");
     console.log(req.query);
@@ -143,20 +147,21 @@ router.post('/loginZPP', async(req, res) => {
             console.log('Error Conexión DB');
             return console.error(err.message);
         }
-        console.log('[Usuarios.getLogin] Connected to the SQlite file database.');
     });
     let sql = "select * from USUARIOS where C_USUARIO='" + req.query.UserEMail +"';";
     ret = sqlite3.run(sql);
-    console.log(ret[0]);
     if(ret[0] == undefined){
         // res.send("ACCESO DENEGADO");
         res.status(502).send();
     }
     else{
-        console.log(ret[0].PASSWORD);
         sqlite3.close();
         if(await bcrypt.compare(req.query.UserPasswd, ret[0].PASSWORD)){
-            res.send({respuesta: "Acceso Concedido"});
+            if(ret[0].NECESARIO_CAMBIO_PASSWD == "S"){
+                res.send({respuesta: "Cambio passwd necesario"});
+            }else{
+                res.send({respuesta: "Acceso Concedido"});
+            }
         }
         else{
             // res.send("ACCESO DENEGADO");
@@ -166,7 +171,129 @@ router.post('/loginZPP', async(req, res) => {
     
 })
 
+router.post('/resetPasswdZPP', async(req, res) => {
+    console.log("resetPasswdZPP");
+    console.log(req.query);
+    // Open a database connection
+    sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
+        if (err) {
+            console.log('Error Conexión DB');
+            return console.error(err.message);
+        }
+        console.log('[Usuarios.resetPass] Connected to the SQlite file database.');
+    });
+    let sql = "select * from USUARIOS where C_USUARIO='" + req.query.UserEMail +"';";
+    ret = sqlite3.run(sql);
+    console.log(ret[0]);
+    if(ret[0] != undefined){
+        try{
+            let userSalt = await bcrypt.genSalt();
+            let newPass = makeid(12);
+            const hashedPassword = await bcrypt.hash(newPass, 10);
+            // const hashedPassword = await bcrypt.hash(req.query.UserPasswd, userSalt);
+            
+            let usuario = {
+                EMailUsuario : req.query.UserEMail, 
+                passwordUsuario : hashedPassword,
+                salt : userSalt
+            }
+            // Open a database connection
+            sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
+                if (err) {
+                    console.log('Error Conexión DB');
+                    return console.error(err.message);
+                }
+                console.log('[Usuarios.postUsuarios] Connected to the SQlite file database.');
+            });
+            
+            let sql = "Update USUARIOS set PASSWORD = '" + hashedPassword + "', NECESARIO_CAMBIO_PASSWD = 'S' where C_USUARIO = '" + usuario.EMailUsuario + "';";
+            console.log(sql);
+            ret = sqlite3.run(sql);
+            console.log(ret);
+            let sql2 = "select * from USUARIOS";
+            ret = sqlite3.run(sql2);
+            sqlite3.close();
+            
+            res.send({estado: "OK", passwd: newPass});
+            // res.status(201).send;
+        }
+        catch{
+            res.status(500).send();
+        }
+    }
+    else{
+        // res.send("USUARIO NO EXISTENTE");
+        res.status(505).send();
+    }
+    
+    
+});
+
+
+router.post('/editarPasswdZPP', async(req, res) => {
+    console.log("editarPasswdZPP");
+    console.log(req.query);
+    // Open a database connection
+    sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
+        if (err) {
+            console.log('Error Conexión DB');
+            return console.error(err.message);
+        }
+        console.log('[Usuarios.resetPass] Connected to the SQlite file database.');
+    });
+    let sql = "select * from USUARIOS where C_USUARIO='" + req.query.UserEMail +"';";
+    ret = sqlite3.run(sql);
+    console.log(ret[0]);
+    if(ret[0] != undefined){
+        try{
+            let oldPass = req.query.UserPasswd;
+            let newPass = req.query.UserNewPasswd;
+            if(await bcrypt.compare(oldPass, ret[0].PASSWORD)){
+                const hashedPassword = await bcrypt.hash(newPass, 10);
+                // Open a database connection
+                sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
+                    if (err) {
+                        console.log('Error Conexión DB');
+                        return console.error(err.message);
+                    }
+                    console.log('[Usuarios.editPass] Connected to the SQlite file database.');
+                });
+                
+                let sql = "Update USUARIOS set PASSWORD = '" + hashedPassword + "', NECESARIO_CAMBIO_PASSWD = 'N' where C_USUARIO = '" +  req.query.UserEMail + "';";
+
+                console.log('aqui llega' + sql);
+                console.log(sql);
+                ret = sqlite3.run(sql);
+                sqlite3.close();
+                console.log("Contraseña actualizada");
+                res.send({estado: "OK"});
+            }
+            else{
+                // res.send("ACCESO DENEGADO");
+                res.status(503).send();
+            }        
+            // res.status(201).send;
+        }
+        catch{
+            res.status(500).send();
+        }
+    }
+    else{
+        // res.send("USUARIO NO EXISTENTE");
+        res.status(505).send();
+    }
+    
+    
+});
+
+
+
+
+
+
+// Obtención de los permisos de un usuario pasado por parametros
 router.get('/getPermisos', (req, res) => {
+    console.log("Get Permisos");
     // Open a database connection
     sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
         if (err) {
@@ -183,7 +310,7 @@ router.get('/getPermisos', (req, res) => {
         sqlite3.close();
         if(ret[0] == undefined){
             // res.send("ACCESO DENEGADO");
-            res.send({});
+            res.status(504).send();
         }
         else{
             res.send(ret);
@@ -191,7 +318,12 @@ router.get('/getPermisos', (req, res) => {
     
 })
 
-router.post('/postPermisos', (req, res) => {
+
+// Creación de un nuevo usuario
+router.post('/postPermisos',multerUpload, (req, res) => {
+    console.log("Post Permisos");
+    console.log("Nombre del archivo");
+    console.log(req.file.filename);    
     // Open a database connection
     let permiso = {
         CodigoUsuario : req.query.UserEmail,
@@ -253,6 +385,17 @@ function devolverFecha(){
 
     let fechaFormateada = dia + "/" + mes + "/"+ anio + " " + hora + ":" + minutos + ":" + segundos;
     return fechaFormateada;
+}
+
+
+function makeid(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
 }
 
 
