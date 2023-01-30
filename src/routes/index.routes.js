@@ -156,10 +156,11 @@ router.post('/loginZPP', async(req, res) => {
     else{
         sqlite3.close();
         if(await bcrypt.compare(req.query.UserPasswd, ret[0].PASSWORD)){
+            let respu = ret[0];
             if(ret[0].NECESARIO_CAMBIO_PASSWD == "S"){
-                res.send({respuesta: "Cambio passwd necesario"}, ret[0]);
+                res.send({respuesta: "Cambio passwd necesario", respu});
             }else{
-                res.send({respuesta: "Acceso Concedido" , ret});
+                res.send({respuesta: "Acceso Concedido" , respu});
             }
         }
         else{
