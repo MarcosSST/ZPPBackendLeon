@@ -151,16 +151,15 @@ router.post('/loginZPP', async(req, res) => {
     let sql = "select * from USUARIOS where C_USUARIO='" + req.query.UserEMail +"';";
     ret = sqlite3.run(sql);
     if(ret[0] == undefined){
-        // res.send("ACCESO DENEGADO");
-        res.status(502).send();
+        res.status(502).send();//Usuario no encontrado
     }
     else{
         sqlite3.close();
         if(await bcrypt.compare(req.query.UserPasswd, ret[0].PASSWORD)){
             if(ret[0].NECESARIO_CAMBIO_PASSWD == "S"){
-                res.send({respuesta: "Cambio passwd necesario"});
+                res.send({respuesta: "Cambio passwd necesario"}, ret[0]);
             }else{
-                res.send({respuesta: "Acceso Concedido"});
+                res.send({respuesta: "Acceso Concedido" , ret});
             }
         }
         else{
