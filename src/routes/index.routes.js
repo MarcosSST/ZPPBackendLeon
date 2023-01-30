@@ -110,7 +110,7 @@ router.get('/', (req, res) => {
                 console.log('[Usuarios.postUsuarios] Connected to the SQlite file database.');
             });
             
-            let sql = "INSERT INTO USUARIOS (C_USUARIO, DNI_CIF, DENOMIMACION, CORREO_E, TLF, TIPO_VIA, NOMBRE_VIA, NUM_VIA, PISO, LETRA, INFORM_ADIC, COD_POSTAL, PASSWORD, SALT) VALUES ('" + usuario.EMailUsuario + "', '"+ usuario.docIdentUsuario +"', '" + usuario.denomUsuario + "', '" + usuario.EMailUsuario + "', " + usuario.telefUsuario + ", '" + usuario.tipoViaUsuario + "', '" + usuario.nomViaUsuario + "', " + usuario.numUsuario + ", " + usuario.pisoUsuario + ", '" + usuario.letraUsuario + "', '" + usuario.infoAdicUsuario + "', '" + usuario.codPostalUsuario + "', '" + usuario.passwordUsuario + "', '" + usuario.salt + "')";
+            let sql = "INSERT INTO USUARIOS (C_USUARIO, DNI_CIF, DENOMINACION, CORREO_E, TLF, TIPO_VIA, NOMBRE_VIA, NUM_VIA, PISO, LETRA, INFORM_ADIC, COD_POSTAL, PASSWORD, SALT) VALUES ('" + usuario.EMailUsuario + "', '"+ usuario.docIdentUsuario +"', '" + usuario.denomUsuario + "', '" + usuario.EMailUsuario + "', " + usuario.telefUsuario + ", '" + usuario.tipoViaUsuario + "', '" + usuario.nomViaUsuario + "', " + usuario.numUsuario + ", " + usuario.pisoUsuario + ", '" + usuario.letraUsuario + "', '" + usuario.infoAdicUsuario + "', '" + usuario.codPostalUsuario + "', '" + usuario.passwordUsuario + "', '" + usuario.salt + "')";
             console.log(sql);
             ret = sqlite3.run(sql);
             console.log(ret);
@@ -134,6 +134,48 @@ router.get('/', (req, res) => {
     // res.send("Uploaded Photo");
     
 });
+
+
+
+
+// Modificación Datos Usuario
+router.put("/modifDatosUsuario", async (req,res) =>{
+    console.log("Modif de Usuario");
+    console.log('Query');
+    console.log(req.query);
+    let usuario = {
+        docIdentUsuario : req.query.UserDocIdent, 
+        denomUsuario : req.query.UserDenom, 
+        EMailUsuario : req.query.UserEMail, 
+        telefUsuario : req.query.UserTel, 
+        tipoViaUsuario : req.query.UserTipoVia, 
+        nomViaUsuario : req.query.UserNomVia, 
+        numUsuario : req.query.UserNumVia, 
+        pisoUsuario : req.query.UserPiso, 
+        letraUsuario : req.query.UserLetra, 
+        infoAdicUsuario : req.query.UserInfoAdic, 
+        codPostalUsuario : req.query.UserCodPostal, 
+    }    
+    // Open a database connection
+    sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
+        if (err) {
+            console.log('Error Conexión DB');
+            return console.error(err.message);
+        }
+        console.log('[Usuarios.postUsuarios] Connected to the SQlite file database.');
+    });
+    let sql = "UPDATE USUARIOS set DNI_CIF = '" + usuario.docIdentUsuario + "', DENOMINACION = '" + usuario.denomUsuario + "', TLF = '" + usuario.telefUsuario + "', TIPO_VIA = '" + usuario.tipoViaUsuario + "', NOMBRE_VIA = '" + usuario.nomViaUsuario + "', NUM_VIA = '" + usuario.numUsuario + "', PISO = '" + usuario.pisoUsuario + "', LETRA = '" + usuario.letraUsuario + "', INFORM_ADIC = '" + usuario.infoAdicUsuario + "', COD_POSTAL = '" + usuario.codPostalUsuario + "' where C_USUARIO = '" + usuario.EMailUsuario + "';";
+    console.log(sql);
+    ret = sqlite3.run(sql);
+    console.log(ret);
+    sqlite3.close();
+    
+    res.send({estado: "OK"});
+            // res.status(201).send;
+    // res.send("Uploaded Photo");
+    
+});
+
 
 
 
