@@ -61,12 +61,10 @@ router.get('/', (req, res) => {
     let sql = "select * from USUARIOS where C_USUARIO='" + req.query.UserEMail +"';";
     ret = sqlite3.run(sql);
     console.log(ret[0]);
-    if(ret[0] == undefined){
+    if(ret[0] == undefined){ //Comprobado que no existe ningun usuario existente con el email pasado por parametro
         try{
             let userSalt = await bcrypt.genSalt();
-            const hashedPassword = await bcrypt.hash(req.query.UserPasswd, 10);
-            // const hashedPassword = await bcrypt.hash(req.query.UserPasswd, userSalt);
-            
+            const hashedPassword = await bcrypt.hash(req.query.UserPasswd, 10);            
             let usuario = {
                 docIdentUsuario : req.query.UserDocIdent, 
                 denomUsuario : req.query.UserDenom, 
@@ -79,17 +77,6 @@ router.get('/', (req, res) => {
                 letraUsuario : req.query.UserLetra, 
                 infoAdicUsuario : req.query.UserInfoAdic, 
                 codPostalUsuario : req.query.UserCodPostal, 
-                // docIdentUsuario : req.params.UserDocIdent, 
-                // denomUsuario : req.params.UserDenom, 
-                // EMailUsuario : req.params.UserEMail, 
-                // telefUsuario : req.params.UserTel, 
-                // tipoViaUsuario : req.queparamsry.UserTipoVia, 
-                // nomViaUsuario : req.params.UserNomVia, 
-                // numUsuario : req.params.UserNumVia, 
-                // pisoUsuario : req.params.UserPiso, 
-                // letraUsuario : req.params.UserLetra, 
-                // infoAdicUsuario : req.params.UserInfoAdic, 
-                // codPostalUsuario : req.params.UserCodPostal, 
                 passwordUsuario : hashedPassword,
                 salt : userSalt
             }
@@ -122,12 +109,12 @@ router.get('/', (req, res) => {
             // res.status(201).send;
         }
         catch{
-            res.status(500).send();
+            res.status(500).send(); //La encriptación de la contraseña o la inserción en la base de datos ha fallado
         }
     }
     else{
         // res.send("USUARIO YA EXISTENTE");
-        res.status(501).send();
+        res.status(501).send();//Ya existe un usuario con ese nombre
     }
     
     
@@ -193,7 +180,7 @@ router.post('/loginZPP', async(req, res) => {
     let sql = "select * from USUARIOS where C_USUARIO='" + req.query.UserEMail +"';";
     ret = sqlite3.run(sql);
     if(ret[0] == undefined){
-        res.status(502).send();//Usuario no encontrado
+        res.status(502).send();//el usuario especificado no se ha encontrado
     }
     else{
         sqlite3.close();
@@ -207,12 +194,14 @@ router.post('/loginZPP', async(req, res) => {
         }
         else{
             // res.send("ACCESO DENEGADO");
-            res.status(503).send();
+            res.status(503).send();//Contraseña incorrecta
         }
     }
     
 })
 
+
+//Recibe un correo electronico del cual se quiere reestablecer la contraseña, genera una nueva contraseña aleatoria y se devuelve al usuario para que la utilice en su siguiente inicio de sesión. Esa contraseña solo será valida para un uso, despues se obligará al usuario a cambiar la contraseña.
 router.post('/resetPasswdZPP', async(req, res) => {
     console.log("resetPasswdZPP");
     console.log(req.query);
@@ -228,9 +217,10 @@ router.post('/resetPasswdZPP', async(req, res) => {
     ret = sqlite3.run(sql);
     console.log(ret[0]);
     if(ret[0] != undefined){
+        //El usuario especificado se ha encontrado
         try{
             let userSalt = await bcrypt.genSalt();
-            let newPass = makeid(12);
+            let newPass = randomPasswd(12);
             const hashedPassword = await bcrypt.hash(newPass, 10);
             // const hashedPassword = await bcrypt.hash(req.query.UserPasswd, userSalt);
             
@@ -260,18 +250,18 @@ router.post('/resetPasswdZPP', async(req, res) => {
             // res.status(201).send;
         }
         catch{
-            res.status(500).send();
+            res.status(500).send(); //La encriptación de la contraseña o la inserción en la base de datos ha fallado
         }
     }
     else{
         // res.send("USUARIO NO EXISTENTE");
-        res.status(505).send();
+        res.status(505).send();//El usuario especificado no se ha encontrado
     }
     
     
 });
 
-
+//Cambio de contraseña
 router.post('/editarPasswdZPP', async(req, res) => {
     console.log("editarPasswdZPP");
     console.log(req.query);
@@ -312,17 +302,17 @@ router.post('/editarPasswdZPP', async(req, res) => {
             }
             else{
                 // res.send("ACCESO DENEGADO");
-                res.status(503).send();
+                res.status(503).send();//La contraseña antigua no es correcta
             }        
             // res.status(201).send;
         }
         catch{
-            res.status(500).send();
+            res.status(500).send(); //La encriptación de la contraseña o la inserción en la base de datos ha fallado
         }
     }
     else{
         // res.send("USUARIO NO EXISTENTE");
-        res.status(505).send();
+        res.status(505).send();// El usuario especificado no se ha encontrado
     }
     
     
@@ -398,6 +388,7 @@ router.post('/postPermisos',multerUpload, (req, res) => {
       sqlite3.close();
 })
 
+//Devuelve la fecha y la hora en formato DD/MM/YYYY HH:mm:SS
 function devolverFecha(){
     const d = new Date();
 
@@ -408,6 +399,8 @@ function devolverFecha(){
     let minutos = d.getMinutes();
     let segundos = d.getSeconds();
 
+
+    //En los siguientes campos, si por ejemplo es el dia 4 de enero, devuelve 4/1/2xxx, por lo que se inserta un 0 antes para acomodar su formato a 04/01/2xxx
     if (dia.toString().length == 1){
         dia = "0" + dia;
     }
@@ -429,8 +422,8 @@ function devolverFecha(){
     return fechaFormateada;
 }
 
-
-function makeid(length) {
+//Genera una cadena de texto alfanumerica de la longitud que se le indica por parametro
+function randomPasswd(length) {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
