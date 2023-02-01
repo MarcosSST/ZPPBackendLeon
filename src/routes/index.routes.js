@@ -18,11 +18,13 @@ const storage = multer.diskStorage({
 
 
 //Middleware
-const multerUpload = multer({
+
+
+const multerUploadcsv = multer({
     storage: storage,
-    dest: path.join(__dirname, '../public/utilDocs'),
+    dest: path.join(__dirname, '../public/utilDocs/csv'),
     fileFilter: (req,file,cb) => {
-        const fileTypes = /csv|jpg|png/;
+        const fileTypes = /csv/;
         const mimetype = fileTypes.test(file.mimetype);
         const extName = fileTypes.test(path.extname(file.originalname))
         if(mimetype && extName){
@@ -30,8 +32,79 @@ const multerUpload = multer({
         }
         cb("Error: el archivo debe ser una imagen valida")
     }
-}).single("foto");
+}).single("csv");
 
+
+const multerUploadAlbaran = multer({
+    storage: storage,
+    dest: path.join(__dirname, '../public/utilDocs/albaranes'),
+    fileFilter: (req,file,cb) => {
+        const fileTypes = /pdf|jpg|png/;
+        const mimetype = fileTypes.test(file.mimetype);
+        const extName = fileTypes.test(path.extname(file.originalname))
+        if(mimetype && extName){
+            return cb(null, true);
+        }
+        cb("Error: el archivo debe ser una imagen valida")
+    }
+}).single("csv");
+
+
+const multerUploadDNI = multer({
+    storage: storage,
+    dest: path.join(__dirname, '../public/utilDocs/dni'),
+    fileFilter: (req,file,cb) => {
+        const fileTypes = /pdf|jpg|png/;
+        const mimetype = fileTypes.test(file.mimetype);
+        const extName = fileTypes.test(path.extname(file.originalname))
+        if(mimetype && extName){
+            return cb(null, true);
+        }
+        cb("Error: el archivo debe ser una imagen valida")
+    }
+}).single("dni");
+
+const multerUploadEscritura = multer({
+    storage: storage,
+    dest: path.join(__dirname, '../public/utilDocs/escrituras'),
+    fileFilter: (req,file,cb) => {
+        const fileTypes = /pdf|jpg|png/;
+        const mimetype = fileTypes.test(file.mimetype);
+        const extName = fileTypes.test(path.extname(file.originalname))
+        if(mimetype && extName){
+            return cb(null, true);
+        }
+        cb("Error: el archivo debe ser una imagen valida")
+    }
+}).single("escritura");
+
+const multerUploadFoto = multer({
+    storage: storage,
+    dest: path.join(__dirname, '../public/utilDocs/fotografias'),
+    fileFilter: (req,file,cb) => {
+        const fileTypes = /pdf|jpg|png/;
+        const mimetype = fileTypes.test(file.mimetype);
+        const extName = fileTypes.test(path.extname(file.originalname))
+        if(mimetype && extName){
+            return cb(null, true);
+        }
+        cb("Error: el archivo debe ser una imagen valida")
+    }
+}).single("fotoUsuario");
+
+const multerUploadDocVehiculo = multer({
+    storage: storage,
+    dest: path.join(__dirname, '../public/utilDocs/docVehiculos'),
+    fileFilter: (req,file,cb) => {
+        const fileTypes = /pdf|jpg|png/;
+        const mimetype = fileTypes.test(file.mimetype);
+        const extName = fileTypes.test(path.extname(file.originalname))
+        if(mimetype && extName){
+            return cb(null, true);
+        }
+        cb("Error: el archivo debe ser una imagen valida")
+    }
+}).single("doc");
 
 router.use(Router.urlencoded());
 
@@ -352,7 +425,7 @@ router.get('/getPermisos', (req, res) => {
 
 
 // Creación de un nuevo usuario
-router.post('/postPermisos',multerUpload, (req, res) => {
+router.post('/postPermisos', (req, res) => {
     console.log("Post Permisos");
     console.log("Nombre del archivo");
     console.log(req.file.filename);    
