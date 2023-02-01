@@ -22,7 +22,7 @@ const multerUpload = multer({
     storage: storage,
     dest: path.join(__dirname, '../public/utilDocs'),
     fileFilter: (req,file,cb) => {
-        const fileTypes = /csv|jpg/;
+        const fileTypes = /csv|jpg|png/;
         const mimetype = fileTypes.test(file.mimetype);
         const extName = fileTypes.test(path.extname(file.originalname))
         if(mimetype && extName){
@@ -365,6 +365,7 @@ router.post('/postPermisos',multerUpload, (req, res) => {
         CodigoSubcategoria : req.query.CodaSubcat,
         FechaInicio : req.query.FecIni,
         FechaFin : req.query.FecFin,
+        Matricula : req.query.Matricula,
         ValidacionRequerida : req.query.reqValid//"N" no, "S" si
     }
     if(permiso.ValidacionRequerida == "N"){
@@ -382,7 +383,7 @@ router.post('/postPermisos',multerUpload, (req, res) => {
         console.log('[Permisos.postPermisos] Connected to the SQlite file database.');
         });
         console.log(req.query);
-      let sql = "INSERT INTO USUARIOS (C_USUARIO, ESTADO, C_ZONA, C_CATEG, C_SUBCATEG, FEC_INI, FEC_FIN, FEC_CREACION) VALUES ('" + permiso.EmailUsuario + "', '"+ permiso.EstadoPermiso +"', '" + permiso.CodigoZona + "', '" + permiso.CodigoCategoria + "', '" + permiso.CodigoSubcategoria + "', '" + permiso.FechaInicio + "', '" + permiso.FechaFin + "', '" + fechaCompleta + "')";
+      let sql = "INSERT INTO USUARIOS (C_USUARIO, ESTADO, C_ZONA, C_CATEG, C_SUBCATEG, FEC_INI, FEC_FIN, FEC_CREACION, MATRICULA) VALUES ('" + permiso.EmailUsuario + "', '"+ permiso.EstadoPermiso +"', '" + permiso.CodigoZona + "', '" + permiso.CodigoCategoria + "', '" + permiso.CodigoSubcategoria + "', '" + permiso.FechaInicio + "', '" + permiso.FechaFin + "', '" + fechaCompleta + "', '" + permiso.Matricula + "')";
       ret = sqlite3.run(sql);
 
       sqlite3.close();
@@ -433,5 +434,28 @@ function randomPasswd(length) {
     return result;
 }
 
+
+router.post("/photoUpload", multerUpload, (req,res) =>{
+    console.log('DATOS RECIBIDOS: ');
+    console.log(req);
+    let codIncidencia = req.body.codIncidencia;
+    let ficheroImagen = req.file.filename;
+    // Open a database connection
+    sqlite3.connect(path.join(__dirname, '../database/smartrsu.db'), (err) => {
+    if (err) {
+        console.log('Error Conexión DB');
+        return console.error(err.message);
+    }
+    console.log('[imagenes.postImagenes] Connected to the SQlite file database.');
+    });
+
+    let sql = "INSERT INTO imagenes (codIncidencia, ficheroImagen) VALUES ('" + codIncidencia + "', '" + ficheroImagen + "');";
+    ret = sqlite3.run(sql);
+
+    sqlite3.close();
+
+    res.send("Uploaded Photo");
+
+  });
 
 module.exports = router;
