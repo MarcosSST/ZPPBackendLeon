@@ -427,8 +427,6 @@ router.get('/getPermisos', (req, res) => {
 // Creación de un nuevo usuario
 router.post('/postPermisos', (req, res) => {
     console.log("Post Permisos");
-    console.log("Nombre del archivo");
-    console.log(req.file.filename);    
     // Open a database connection
     let permiso = {
         CodigoUsuario : req.query.UserEmail,
