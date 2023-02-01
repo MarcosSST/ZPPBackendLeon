@@ -429,7 +429,7 @@ router.post('/postPermisos', (req, res) => {
     console.log("Post Permisos");
     // Open a database connection
     let permiso = {
-        CodigoUsuario : req.query.UserEmail,
+        CodigoUsuario : req.query.UserEMail,
         EstadoPermiso : "Pendiente",
         CodigoZona : req.query.CodZona,
         CodigoCategoria : req.query.CodCat,
@@ -443,21 +443,17 @@ router.post('/postPermisos', (req, res) => {
         permiso.EstadoPermiso = "Aprobado";
     }
     let fechaCompleta = devolverFecha();
-    
-    console.log(fechaCompleta);
-
     sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
         if (err) {
             console.log('Error Conexión DB');
             return console.error(err.message);
         }
         console.log('[Permisos.postPermisos] Connected to the SQlite file database.');
-        });
-        console.log(req.query);
-      let sql = "INSERT INTO USUARIOS (C_USUARIO, ESTADO, C_ZONA, C_CATEG, C_SUBCATEG, FEC_INI, FEC_FIN, FEC_CREACION, MATRICULA) VALUES ('" + permiso.EmailUsuario + "', '"+ permiso.EstadoPermiso +"', '" + permiso.CodigoZona + "', '" + permiso.CodigoCategoria + "', '" + permiso.CodigoSubcategoria + "', '" + permiso.FechaInicio + "', '" + permiso.FechaFin + "', '" + fechaCompleta + "', '" + permiso.Matricula + "')";
-      ret = sqlite3.run(sql);
-
-      sqlite3.close();
+    });
+    console.log(req.query);
+    let sql = "INSERT INTO PERMISOS (C_USUARIO, ESTADO, C_ZONA, C_CATEG, C_SUBCATEG, FEC_INI, FEC_FIN, FEC_CREACION, MATRICULA) VALUES ('" + permiso.CodigoUsuario + "', '"+ permiso.EstadoPermiso +"', '" + permiso.CodigoZona + "', '" + permiso.CodigoCategoria + "', '" + permiso.CodigoSubcategoria + "', '" + permiso.FechaInicio + "', '" + permiso.FechaFin + "', '" + fechaCompleta + "', '" + permiso.Matricula + "')";
+    ret = sqlite3.run(sql);
+    sqlite3.close();
 })
 
 //Devuelve la fecha y la hora en formato DD/MM/YYYY HH:mm:SS
