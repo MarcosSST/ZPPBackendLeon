@@ -362,7 +362,7 @@ router.post('/postPermisos',multerUpload, (req, res) => {
         EstadoPermiso : "Pendiente",
         CodigoZona : req.query.CodZona,
         CodigoCategoria : req.query.CodCat,
-        CodigoSubcategoria : req.query.CodaSubcat,
+        CodigoSubcategoria : req.query.CodSubcat,
         FechaInicio : req.query.FecIni,
         FechaFin : req.query.FecFin,
         Matricula : req.query.Matricula,
