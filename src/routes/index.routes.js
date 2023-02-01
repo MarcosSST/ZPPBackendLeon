@@ -443,6 +443,8 @@ router.post('/postPermisos', (req, res) => {
         permiso.EstadoPermiso = "Aprobado";
     }
     let fechaCompleta = devolverFecha();
+    console.log(fechaCompleta);
+
     sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
         if (err) {
             console.log('Error Conexión DB');
@@ -453,7 +455,10 @@ router.post('/postPermisos', (req, res) => {
     console.log(req.query);
     let sql = "INSERT INTO PERMISOS (C_USUARIO, ESTADO, C_ZONA, C_CATEG, C_SUBCATEG, FEC_INI, FEC_FIN, FEC_CREACION, MATRICULA) VALUES ('" + permiso.CodigoUsuario + "', '"+ permiso.EstadoPermiso +"', '" + permiso.CodigoZona + "', '" + permiso.CodigoCategoria + "', '" + permiso.CodigoSubcategoria + "', '" + permiso.FechaInicio + "', '" + permiso.FechaFin + "', '" + fechaCompleta + "', '" + permiso.Matricula + "')";
     ret = sqlite3.run(sql);
+    console.log('RET');
+    console.log(ret);
     sqlite3.close();
+    res.send({estado: "OK"});
 })
 
 //Devuelve la fecha y la hora en formato DD/MM/YYYY HH:mm:SS
