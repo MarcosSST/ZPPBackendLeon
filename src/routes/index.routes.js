@@ -506,27 +506,27 @@ function randomPasswd(length) {
 }
 
 
-router.post("/photoUpload", multerUpload, (req,res) =>{
-    console.log('DATOS RECIBIDOS: ');
-    console.log(req);
-    let codIncidencia = req.body.codIncidencia;
-    let ficheroImagen = req.file.filename;
-    // Open a database connection
-    sqlite3.connect(path.join(__dirname, '../database/smartrsu.db'), (err) => {
-    if (err) {
-        console.log('Error Conexión DB');
-        return console.error(err.message);
-    }
-    console.log('[imagenes.postImagenes] Connected to the SQlite file database.');
-    });
+// router.post("/photoUpload", multerUpload, (req,res) =>{
+//     console.log('DATOS RECIBIDOS: ');
+//     console.log(req);
+//     let codIncidencia = req.body.codIncidencia;
+//     let ficheroImagen = req.file.filename;
+//     // Open a database connection
+//     sqlite3.connect(path.join(__dirname, '../database/smartrsu.db'), (err) => {
+//     if (err) {
+//         console.log('Error Conexión DB');
+//         return console.error(err.message);
+//     }
+//     console.log('[imagenes.postImagenes] Connected to the SQlite file database.');
+//     });
 
-    let sql = "INSERT INTO imagenes (codIncidencia, ficheroImagen) VALUES ('" + codIncidencia + "', '" + ficheroImagen + "');";
-    ret = sqlite3.run(sql);
+//     let sql = "INSERT INTO imagenes (codIncidencia, ficheroImagen) VALUES ('" + codIncidencia + "', '" + ficheroImagen + "');";
+//     ret = sqlite3.run(sql);
 
-    sqlite3.close();
+//     sqlite3.close();
 
-    res.send("Uploaded Photo");
+//     res.send("Uploaded Photo");
 
-  });
+//   });
 
 module.exports = router;
