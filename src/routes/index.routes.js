@@ -4,6 +4,8 @@ const multer = require("multer");
 const bcrypt = require("bcrypt");
 const path = require("path");
 
+const bodyParser = require('body-parser'); 
+
 const sqlite3 = require('sqlite-sync');
 
 const router = Router();
@@ -17,94 +19,114 @@ const storage = multer.diskStorage({
 })
 
 
+
 //Middleware
 
+router.use(bodyParser.json()); // parse application/json
+router.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 
-const multerUploadcsv = multer({
-    storage: storage,
-    dest: path.join(__dirname, '../public/utilDocs/csv'),
-    fileFilter: (req,file,cb) => {
-        const fileTypes = /csv/;
-        const mimetype = fileTypes.test(file.mimetype);
-        const extName = fileTypes.test(path.extname(file.originalname))
-        if(mimetype && extName){
-            return cb(null, true);
+
+const multi_upload = multer({
+    storage,
+    limits: { fileSize: 1 * 1024 * 1024 }, // 1MB
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "application/pdf" || file.mimetype == "text/csv") {
+            cb(null, true);
+        } else {
+            cb(null, false);
+            const err = new Error('Only .png, .jpg and .jpeg format allowed!')
+            err.name = 'ExtensionError'
+            return cb(err);
         }
-        cb("Error: el archivo debe ser una imagen valida")
-    }
-}).single("csv");
+    },
+}).array('uploadedFiles')
 
 
-const multerUploadAlbaran = multer({
-    storage: storage,
-    dest: path.join(__dirname, '../public/utilDocs/albaranes'),
-    fileFilter: (req,file,cb) => {
-        const fileTypes = /pdf|jpg|png/;
-        const mimetype = fileTypes.test(file.mimetype);
-        const extName = fileTypes.test(path.extname(file.originalname))
-        if(mimetype && extName){
-            return cb(null, true);
-        }
-        cb("Error: el archivo debe ser una imagen valida")
-    }
-}).single("csv");
+// const multerUploadcsv = multer({
+//     storage: storage,
+//     dest: path.join(__dirname, '../public/utilDocs/csv'),
+//     fileFilter: (req,file,cb) => {
+//         const fileTypes = /csv/;
+//         const mimetype = fileTypes.test(file.mimetype);
+//         const extName = fileTypes.test(path.extname(file.originalname))
+//         if(mimetype && extName){
+//             return cb(null, true);
+//         }
+//         cb("Error: el archivo debe ser una imagen valida")
+//     }
+// }).single("csv");
 
 
-const multerUploadDNI = multer({
-    storage: storage,
-    dest: path.join(__dirname, '../public/utilDocs/dni'),
-    fileFilter: (req,file,cb) => {
-        const fileTypes = /pdf|jpg|png/;
-        const mimetype = fileTypes.test(file.mimetype);
-        const extName = fileTypes.test(path.extname(file.originalname))
-        if(mimetype && extName){
-            return cb(null, true);
-        }
-        cb("Error: el archivo debe ser una imagen valida")
-    }
-}).single("dni");
+// const multerUploadAlbaran = multer({
+//     storage: storage,
+//     dest: path.join(__dirname, '../public/utilDocs/albaranes'),
+//     fileFilter: (req,file,cb) => {
+//         const fileTypes = /pdf|jpg|png/;
+//         const mimetype = fileTypes.test(file.mimetype);
+//         const extName = fileTypes.test(path.extname(file.originalname))
+//         if(mimetype && extName){
+//             return cb(null, true);
+//         }
+//         cb("Error: el archivo debe ser una imagen valida")
+//     }
+// }).single("csv");
 
-const multerUploadEscritura = multer({
-    storage: storage,
-    dest: path.join(__dirname, '../public/utilDocs/escrituras'),
-    fileFilter: (req,file,cb) => {
-        const fileTypes = /pdf|jpg|png/;
-        const mimetype = fileTypes.test(file.mimetype);
-        const extName = fileTypes.test(path.extname(file.originalname))
-        if(mimetype && extName){
-            return cb(null, true);
-        }
-        cb("Error: el archivo debe ser una imagen valida")
-    }
-}).single("escritura");
 
-const multerUploadFoto = multer({
-    storage: storage,
-    dest: path.join(__dirname, '../public/utilDocs/fotografias'),
-    fileFilter: (req,file,cb) => {
-        const fileTypes = /pdf|jpg|png/;
-        const mimetype = fileTypes.test(file.mimetype);
-        const extName = fileTypes.test(path.extname(file.originalname))
-        if(mimetype && extName){
-            return cb(null, true);
-        }
-        cb("Error: el archivo debe ser una imagen valida")
-    }
-}).single("fotoUsuario");
+// const multerUploadDNI = multer({
+//     storage: storage,
+//     dest: path.join(__dirname, '../public/utilDocs/dni'),
+//     fileFilter: (req,file,cb) => {
+//         const fileTypes = /pdf|jpg|png/;
+//         const mimetype = fileTypes.test(file.mimetype);
+//         const extName = fileTypes.test(path.extname(file.originalname))
+//         if(mimetype && extName){
+//             return cb(null, true);
+//         }
+//         cb("Error: el archivo debe ser una imagen valida")
+//     }
+// }).single("dni");
 
-const multerUploadDocVehiculo = multer({
-    storage: storage,
-    dest: path.join(__dirname, '../public/utilDocs/docVehiculos'),
-    fileFilter: (req,file,cb) => {
-        const fileTypes = /pdf|jpg|png/;
-        const mimetype = fileTypes.test(file.mimetype);
-        const extName = fileTypes.test(path.extname(file.originalname))
-        if(mimetype && extName){
-            return cb(null, true);
-        }
-        cb("Error: el archivo debe ser una imagen valida")
-    }
-}).single("doc");
+// const multerUploadEscritura = multer({
+//     storage: storage,
+//     dest: path.join(__dirname, '../public/utilDocs/escrituras'),
+//     fileFilter: (req,file,cb) => {
+//         const fileTypes = /pdf|jpg|png/;
+//         const mimetype = fileTypes.test(file.mimetype);
+//         const extName = fileTypes.test(path.extname(file.originalname))
+//         if(mimetype && extName){
+//             return cb(null, true);
+//         }
+//         cb("Error: el archivo debe ser una imagen valida")
+//     }
+// }).single("escritura");
+
+// const multerUploadFoto = multer({
+//     storage: storage,
+//     dest: path.join(__dirname, '../public/utilDocs/fotografias'),
+//     fileFilter: (req,file,cb) => {
+//         const fileTypes = /pdf|jpg|png/;
+//         const mimetype = fileTypes.test(file.mimetype);
+//         const extName = fileTypes.test(path.extname(file.originalname))
+//         if(mimetype && extName){
+//             return cb(null, true);
+//         }
+//         cb("Error: el archivo debe ser una imagen valida")
+//     }
+// }).single("fotoUsuario");
+
+// const multerUploadDocVehiculo = multer({
+//     storage: storage,
+//     dest: path.join(__dirname, '../public/utilDocs/docVehiculos'),
+//     fileFilter: (req,file,cb) => {
+//         const fileTypes = /pdf|jpg|png/;
+//         const mimetype = fileTypes.test(file.mimetype);
+//         const extName = fileTypes.test(path.extname(file.originalname))
+//         if(mimetype && extName){
+//             return cb(null, true);
+//         }
+//         cb("Error: el archivo debe ser una imagen valida")
+//     }
+// }).single("doc");
 
 router.use(Router.urlencoded());
 
@@ -119,10 +141,7 @@ router.get('/', (req, res) => {
 // Registro de nuevo usuario
   router.post("/altasUsuarioZPPencriptacion", async (req,res) =>{
     console.log("Alta de Usuario");
-    console.log(req.params);
     console.log(req.body);
-    console.log('Query');
-    console.log(req.query);
     // Open a database connection
     sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
         if (err) {
@@ -201,20 +220,20 @@ router.get('/', (req, res) => {
 // Modificación Datos Usuario
 router.put("/modifDatosUsuario", async (req,res) =>{
     console.log("Modif de Usuario");
-    console.log('Query');
-    console.log(req.query);
+    console.log('Body');
+    console.log(req.body);
     let usuario = {
-        docIdentUsuario : req.query.UserDocIdent, 
-        denomUsuario : req.query.UserDenom, 
-        EMailUsuario : req.query.UserEMail, 
-        telefUsuario : req.query.UserTel, 
-        tipoViaUsuario : req.query.UserTipoVia, 
-        nomViaUsuario : req.query.UserNomVia, 
-        numUsuario : req.query.UserNumVia, 
-        pisoUsuario : req.query.UserPiso, 
-        letraUsuario : req.query.UserLetra, 
-        infoAdicUsuario : req.query.UserInfoAdic, 
-        codPostalUsuario : req.query.UserCodPostal, 
+        docIdentUsuario : req.body.UserDocIdent, 
+        denomUsuario : req.body.UserDenom, 
+        EMailUsuario : req.body.UserEMail, 
+        telefUsuario : req.body.UserTel, 
+        tipoViaUsuario : req.body.UserTipoVia, 
+        nomViaUsuario : req.body.UserNomVia, 
+        numUsuario : req.body.UserNumVia, 
+        pisoUsuario : req.body.UserPiso, 
+        letraUsuario : req.body.UserLetra, 
+        infoAdicUsuario : req.body.UserInfoAdic, 
+        codPostalUsuario : req.body.UserCodPostal, 
     }    
     // Open a database connection
     sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
@@ -242,7 +261,12 @@ router.put("/modifDatosUsuario", async (req,res) =>{
 // Validación de inicio de sesión 
 router.post('/loginZPP', async(req, res) => {
     console.log("loginZPP");
+    console.log('Query');
     console.log(req.query);
+    console.log('Body');
+    console.log(req.body);
+    console.log('Params');
+    console.log(req.params);
     // Open a database connection
     sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
         if (err) {
@@ -250,14 +274,14 @@ router.post('/loginZPP', async(req, res) => {
             return console.error(err.message);
         }
     });
-    let sql = "select * from USUARIOS where C_USUARIO='" + req.query.UserEMail +"';";
+    let sql = "select * from USUARIOS where C_USUARIO='" + req.body.UserEMail +"';";
     ret = sqlite3.run(sql);
     if(ret[0] == undefined){
         res.status(502).send();//el usuario especificado no se ha encontrado
     }
     else{
         sqlite3.close();
-        if(await bcrypt.compare(req.query.UserPasswd, ret[0].PASSWORD)){
+        if(await bcrypt.compare(req.body.UserPasswd, ret[0].PASSWORD)){
             let respu = ret[0];
             if(ret[0].NECESARIO_CAMBIO_PASSWD == "S"){
                 res.send({respuesta: "Cambio passwd necesario", respu});
@@ -277,7 +301,7 @@ router.post('/loginZPP', async(req, res) => {
 //Recibe un correo electronico del cual se quiere reestablecer la contraseña, genera una nueva contraseña aleatoria y se devuelve al usuario para que la utilice en su siguiente inicio de sesión. Esa contraseña solo será valida para un uso, despues se obligará al usuario a cambiar la contraseña.
 router.post('/resetPasswdZPP', async(req, res) => {
     console.log("resetPasswdZPP");
-    console.log(req.query);
+    console.log(req.body);
     // Open a database connection
     sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
         if (err) {
@@ -286,7 +310,7 @@ router.post('/resetPasswdZPP', async(req, res) => {
         }
         console.log('[Usuarios.resetPass] Connected to the SQlite file database.');
     });
-    let sql = "select * from USUARIOS where C_USUARIO='" + req.query.UserEMail +"';";
+    let sql = "select * from USUARIOS where C_USUARIO='" + req.body.UserEMail +"';";
     ret = sqlite3.run(sql);
     console.log(ret[0]);
     if(ret[0] != undefined){
@@ -295,10 +319,10 @@ router.post('/resetPasswdZPP', async(req, res) => {
             let userSalt = await bcrypt.genSalt();
             let newPass = randomPasswd(12);
             const hashedPassword = await bcrypt.hash(newPass, 10);
-            // const hashedPassword = await bcrypt.hash(req.query.UserPasswd, userSalt);
+
             
             let usuario = {
-                EMailUsuario : req.query.UserEMail, 
+                EMailUsuario : req.body.UserEMail, 
                 passwordUsuario : hashedPassword,
                 salt : userSalt
             }
@@ -337,7 +361,7 @@ router.post('/resetPasswdZPP', async(req, res) => {
 //Cambio de contraseña
 router.post('/editarPasswdZPP', async(req, res) => {
     console.log("editarPasswdZPP");
-    console.log(req.query);
+    console.log(req.body);
     // Open a database connection
     sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
         if (err) {
@@ -346,13 +370,13 @@ router.post('/editarPasswdZPP', async(req, res) => {
         }
         console.log('[Usuarios.resetPass] Connected to the SQlite file database.');
     });
-    let sql = "select * from USUARIOS where C_USUARIO='" + req.query.UserEMail +"';";
+    let sql = "select * from USUARIOS where C_USUARIO='" + req.body.UserEMail +"';";
     ret = sqlite3.run(sql);
     console.log(ret[0]);
     if(ret[0] != undefined){
         try{
-            let oldPass = req.query.UserPasswd;
-            let newPass = req.query.UserNewPasswd;
+            let oldPass = req.body.UserPasswd;
+            let newPass = req.body.UserNewPasswd;
             if(await bcrypt.compare(oldPass, ret[0].PASSWORD)){
                 const hashedPassword = await bcrypt.hash(newPass, 10);
                 // Open a database connection
@@ -364,7 +388,7 @@ router.post('/editarPasswdZPP', async(req, res) => {
                     console.log('[Usuarios.editPass] Connected to the SQlite file database.');
                 });
                 
-                let sql = "Update USUARIOS set PASSWORD = '" + hashedPassword + "', NECESARIO_CAMBIO_PASSWD = 'N' where C_USUARIO = '" +  req.query.UserEMail + "';";
+                let sql = "Update USUARIOS set PASSWORD = '" + hashedPassword + "', NECESARIO_CAMBIO_PASSWD = 'N' where C_USUARIO = '" +  req.body.UserEMail + "';";
 
                 console.log('aqui llega' + sql);
                 console.log(sql);
@@ -408,7 +432,7 @@ router.get('/getPermisos', (req, res) => {
         console.log('[Permisos.getPermisos] Connected to the SQlite file database.');
         });
         console.log(req.query);
-        let sql = "SELECT * from PERMISOS WHERE C_USUARIO = '" + req.query.UserEmail + "';";
+        let sql = "SELECT * from PERMISOS WHERE C_USUARIO = '" + req.query.UserEMail + "';";
         ret = sqlite3.run(sql);
         console.log('RET');
         console.log(ret);
@@ -425,19 +449,47 @@ router.get('/getPermisos', (req, res) => {
 
 
 // Creación de un nuevo usuario
+
 router.post('/postPermisos', (req, res) => {
+    console.log("PostPermisos");
+    console.log('Body');
+    console.log(req.body);
+    console.log(req.query);
+    console.log(req.params);
+    console.log(req.file);
+    multi_upload(req, res, function (err) {
+        console.log('Body');
+        console.log(req.body);
+        console.log(req.file);
+        if (err instanceof multer.MulterError) {
+            // A Multer error occurred when uploading.
+            console.log(err.message);
+            console.log(err.field);
+            res.status(568).send({ error: { message: `Multer uploading error: ${err.message}` } }).end();
+            return;
+        } else if (err) {
+            // An unknown error occurred when uploading.
+            if (err.name == 'ExtensionError') {
+                console.log(err);
+                console.log(err.field);
+                res.status(413).send({ error: { message: err.message } }).end();
+            } else {
+                res.status(500).send({ error: { message: `unknown uploading error: ${err.message}` } }).end();
+            }
+            return;
+        }
     console.log("Post Permisos");
     // Open a database connection
     let permiso = {
-        CodigoUsuario : req.query.UserEMail,
+        CodigoUsuario : req.body.UserEMail,
         EstadoPermiso : "Pendiente",
-        CodigoZona : req.query.CodZona,
-        CodigoCategoria : req.query.CodCat,
-        CodigoSubcategoria : req.query.CodSubcat,
-        FechaInicio : req.query.FecIni,
-        FechaFin : req.query.FecFin,
-        Matricula : req.query.Matricula,
-        ValidacionRequerida : req.query.reqValid//"N" no, "S" si
+        CodigoZona : req.body.CodZona,
+        CodigoCategoria : req.body.CodCat,
+        CodigoSubcategoria : req.body.CodSubcat,
+        FechaInicio : req.body.FecIni,
+        FechaFin : req.body.FecFin,
+        Matricula : req.body.Matricula,
+        ValidacionRequerida : req.body.reqValid//"N" no, "S" si
     }
     if(permiso.ValidacionRequerida == "N"){
         permiso.EstadoPermiso = "Aprobado";
@@ -448,18 +500,21 @@ router.post('/postPermisos', (req, res) => {
     sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
         if (err) {
             console.log('Error Conexión DB');
+            res.status(504).send();
             return console.error(err.message);
         }
         console.log('[Permisos.postPermisos] Connected to the SQlite file database.');
     });
-    console.log(req.query);
+    console.log(req.body.UserEMail);
+    console.log('QUERY^^^^^^^');
     let sql = "INSERT INTO PERMISOS (C_USUARIO, ESTADO, C_ZONA, C_CATEG, C_SUBCATEG, FEC_INI, FEC_FIN, FEC_CREACION, MATRICULA) VALUES ('" + permiso.CodigoUsuario + "', '"+ permiso.EstadoPermiso +"', '" + permiso.CodigoZona + "', '" + permiso.CodigoCategoria + "', '" + permiso.CodigoSubcategoria + "', '" + permiso.FechaInicio + "', '" + permiso.FechaFin + "', '" + fechaCompleta + "', '" + permiso.Matricula + "')";
     ret = sqlite3.run(sql);
     console.log('RET');
     console.log(ret);
     sqlite3.close();
     res.send({estado: "OK"});
-})
+    })
+});
 
 //Devuelve la fecha y la hora en formato DD/MM/YYYY HH:mm:SS
 function devolverFecha(){
@@ -506,28 +561,5 @@ function randomPasswd(length) {
     return result;
 }
 
-
-// router.post("/photoUpload", multerUpload, (req,res) =>{
-//     console.log('DATOS RECIBIDOS: ');
-//     console.log(req);
-//     let codIncidencia = req.body.codIncidencia;
-//     let ficheroImagen = req.file.filename;
-//     // Open a database connection
-//     sqlite3.connect(path.join(__dirname, '../database/smartrsu.db'), (err) => {
-//     if (err) {
-//         console.log('Error Conexión DB');
-//         return console.error(err.message);
-//     }
-//     console.log('[imagenes.postImagenes] Connected to the SQlite file database.');
-//     });
-
-//     let sql = "INSERT INTO imagenes (codIncidencia, ficheroImagen) VALUES ('" + codIncidencia + "', '" + ficheroImagen + "');";
-//     ret = sqlite3.run(sql);
-
-//     sqlite3.close();
-
-//     res.send("Uploaded Photo");
-
-//   });
 
 module.exports = router;
