@@ -22,13 +22,13 @@ const storage = multer.diskStorage({
 
 //Middleware
 
-router.use(bodyParser.json()); // parse application/json
-router.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
+router.use(bodyParser.json({limit: '500mb'})); // parse application/json
+router.use(bodyParser.urlencoded({limit : '500mb', extended: true })); // parse application/x-www-form-urlencoded
 
 
 const multi_upload = multer({
     storage,
-    limits: { fileSize: 1 * 1024 * 1024 }, // 1MB
+    limits: { fileSize: 10 * 1024 * 1024 }, // 1MB
     fileFilter: (req, file, cb) => {
         if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "application/pdf" || file.mimetype == "text/csv") {
             cb(null, true);
@@ -451,16 +451,16 @@ router.get('/getPermisos', (req, res) => {
 // Creación de un nuevo usuario
 
 router.post('/postPermisos', (req, res) => {
-    console.log("PostPermisos");
-    console.log('Body');
-    console.log(req.body);
-    console.log(req.query);
-    console.log(req.params);
-    console.log(req.file);
     multi_upload(req, res, function (err) {
+        console.log("DentroDeMulter");
         console.log('Body');
         console.log(req.body);
-        console.log(req.file);
+        console.log('Query');
+        console.log(req.query);
+        console.log('Params');
+        console.log(req.params);
+        console.log('File');
+        console.log(req.files.length);
         if (err instanceof multer.MulterError) {
             // A Multer error occurred when uploading.
             console.log(err.message);
@@ -478,25 +478,36 @@ router.post('/postPermisos', (req, res) => {
             }
             return;
         }
-    console.log("Post Permisos");
+        var arrayNombresFichero = [];
+        if(req.files.length == 0){
+            arrayNombresFichero = "";
+        }else{
+            for(let i = 0; i <  req.files.length; i++){
+                console.log("Nombres de ficheros");
+                console.log(req.files[i].filename);
+                arrayNombresFichero.push(req.files[i].filename);
+            }
+        }
+        let permiso = {
+            CodigoUsuario : req.body.UserEMail,
+            EstadoPermiso : "Pendiente",
+            CodigoZona : req.body.CodZona,
+            CodigoCategoria : req.body.CodCat,
+            CodigoSubcategoria : req.body.CodSubcat,
+            FechaInicio : req.body.FecIni,
+            FechaFin : req.body.FecFin,
+            Matricula : req.body.Matricula,
+            ValidacionRequerida : req.body.reqValid,//"N" no, "S" si
+            Documentos : arrayNombresFichero.toString()
+        }
+        if(permiso.ValidacionRequerida == "N"){
+            permiso.EstadoPermiso = "Aprobado";
+        }
+        let fechaCompleta = devolverFecha();
+        console.log(fechaCompleta);
+        
+        
     // Open a database connection
-    let permiso = {
-        CodigoUsuario : req.body.UserEMail,
-        EstadoPermiso : "Pendiente",
-        CodigoZona : req.body.CodZona,
-        CodigoCategoria : req.body.CodCat,
-        CodigoSubcategoria : req.body.CodSubcat,
-        FechaInicio : req.body.FecIni,
-        FechaFin : req.body.FecFin,
-        Matricula : req.body.Matricula,
-        ValidacionRequerida : req.body.reqValid//"N" no, "S" si
-    }
-    if(permiso.ValidacionRequerida == "N"){
-        permiso.EstadoPermiso = "Aprobado";
-    }
-    let fechaCompleta = devolverFecha();
-    console.log(fechaCompleta);
-
     sqlite3.connect(path.join(__dirname, '../database/zppApp.db'), (err) => {
         if (err) {
             console.log('Error Conexión DB');
@@ -507,7 +518,7 @@ router.post('/postPermisos', (req, res) => {
     });
     console.log(req.body.UserEMail);
     console.log('QUERY^^^^^^^');
-    let sql = "INSERT INTO PERMISOS (C_USUARIO, ESTADO, C_ZONA, C_CATEG, C_SUBCATEG, FEC_INI, FEC_FIN, FEC_CREACION, MATRICULA) VALUES ('" + permiso.CodigoUsuario + "', '"+ permiso.EstadoPermiso +"', '" + permiso.CodigoZona + "', '" + permiso.CodigoCategoria + "', '" + permiso.CodigoSubcategoria + "', '" + permiso.FechaInicio + "', '" + permiso.FechaFin + "', '" + fechaCompleta + "', '" + permiso.Matricula + "')";
+    let sql = "INSERT INTO PERMISOS (C_USUARIO, ESTADO, C_ZONA, C_CATEG, C_SUBCATEG, FEC_INI, FEC_FIN, FEC_CREACION, MATRICULA, DOCUMENTOS) VALUES ('" + permiso.CodigoUsuario + "', '"+ permiso.EstadoPermiso +"', '" + permiso.CodigoZona + "', '" + permiso.CodigoCategoria + "', '" + permiso.CodigoSubcategoria + "', '" + permiso.FechaInicio + "', '" + permiso.FechaFin + "', '" + fechaCompleta + "', '" + permiso.Matricula + "', '" + permiso.Documentos +"');";
     ret = sqlite3.run(sql);
     console.log('RET');
     console.log(ret);
