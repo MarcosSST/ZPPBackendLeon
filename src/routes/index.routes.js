@@ -189,7 +189,7 @@ router.get('/', (req, res) => {
                 console.log('[Usuarios.postUsuarios] Connected to the SQlite file database.');
             });
             
-            let sql = "INSERT INTO USUARIOS (C_USUARIO, DNI_CIF, DENOMINACION, CORREO_E, TLF, TIPO_VIA, NOMBRE_VIA, NUM_VIA, PISO, LETRA, INFORM_ADIC, COD_POSTAL, PASSWORD, SALT) VALUES ('" + usuario.EMailUsuario + "', '"+ usuario.docIdentUsuario +"', '" + usuario.denomUsuario + "', '" + usuario.EMailUsuario + "', " + usuario.telefUsuario + ", '" + usuario.tipoViaUsuario + "', '" + usuario.nomViaUsuario + "', " + usuario.numUsuario + ", " + usuario.pisoUsuario + ", '" + usuario.letraUsuario + "', '" + usuario.infoAdicUsuario + "', '" + usuario.codPostalUsuario + "', '" + usuario.passwordUsuario + "', '" + usuario.salt + "')";
+            let sql = "INSERT INTO USUARIOS (C_USUARIO, DNI_CIF, DENOMINACION, CORREO_E, TLF, TIPO_VIA, NOMBRE_VIA, NUM_VIA, PISO, LETRA, INFORM_ADIC, COD_POSTAL, PASSWORD, SALT, SW_CSV) VALUES ('" + usuario.EMailUsuario + "', '"+ usuario.docIdentUsuario +"', '" + usuario.denomUsuario + "', '" + usuario.EMailUsuario + "', " + usuario.telefUsuario + ", '" + usuario.tipoViaUsuario + "', '" + usuario.nomViaUsuario + "', " + usuario.numUsuario + ", " + usuario.pisoUsuario + ", '" + usuario.letraUsuario + "', '" + usuario.infoAdicUsuario + "', '" + usuario.codPostalUsuario + "', '" + usuario.passwordUsuario + "', '" + usuario.salt + "', ' N ' )";
             console.log(sql);
             ret = sqlite3.run(sql);
             console.log(ret);
