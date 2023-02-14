@@ -189,7 +189,7 @@ router.get('/', (req, res) => {
                 console.log('[Usuarios.postUsuarios] Connected to the SQlite file database.');
             });
             
-            let sql = "INSERT INTO USUARIOS (C_USUARIO, DNI_CIF, DENOMINACION, CORREO_E, TLF, TIPO_VIA, NOMBRE_VIA, NUM_VIA, PISO, LETRA, INFORM_ADIC, COD_POSTAL, PASSWORD, SALT, SW_CSV) VALUES ('" + usuario.EMailUsuario + "', '"+ usuario.docIdentUsuario +"', '" + usuario.denomUsuario + "', '" + usuario.EMailUsuario + "', " + usuario.telefUsuario + ", '" + usuario.tipoViaUsuario + "', '" + usuario.nomViaUsuario + "', " + usuario.numUsuario + ", " + usuario.pisoUsuario + ", '" + usuario.letraUsuario + "', '" + usuario.infoAdicUsuario + "', '" + usuario.codPostalUsuario + "', '" + usuario.passwordUsuario + "', '" + usuario.salt + "', ' N ' )";
+            let sql = "INSERT INTO USUARIOS (C_USUARIO, DNI_CIF, DENOMINACION, CORREO_E, TLF, TIPO_VIA, NOMBRE_VIA, NUM_VIA, PISO, LETRA, INFORM_ADIC, COD_POSTAL, PASSWORD, SALT, SW_CSV) VALUES ('" + usuario.EMailUsuario + "', '"+ usuario.docIdentUsuario +"', '" + usuario.denomUsuario + "', '" + usuario.EMailUsuario + "', " + usuario.telefUsuario + ", '" + usuario.tipoViaUsuario + "', '" + usuario.nomViaUsuario + "', " + usuario.numUsuario + ", " + usuario.pisoUsuario + ", '" + usuario.letraUsuario + "', '" + usuario.infoAdicUsuario + "', '" + usuario.codPostalUsuario + "', '" + usuario.passwordUsuario + "', '" + usuario.salt + "', 'N' )";
             console.log(sql);
             ret = sqlite3.run(sql);
             console.log(ret);
@@ -451,6 +451,7 @@ router.get('/getPermisos', (req, res) => {
 // Creación de un nuevo usuario
 
 router.post('/postPermisos', (req, res) => {
+    console.log('PostPermisos');
     multi_upload(req, res, function (err) {
         console.log("DentroDeMulter");
         console.log('Body');
@@ -474,6 +475,8 @@ router.post('/postPermisos', (req, res) => {
                 console.log(err.field);
                 res.status(413).send({ error: { message: err.message } }).end();
             } else {
+                console.log(err);
+                console.log(err.field);
                 res.status(500).send({ error: { message: `unknown uploading error: ${err.message}` } }).end();
             }
             return;
